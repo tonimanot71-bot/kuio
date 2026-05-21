@@ -1,0 +1,34 @@
+# KUIO — configurazione di default (il wizard di onboarding la completa col cliente)
+# Basata sulla configurazione di ZeroClaw. I valori "DA_CONFIGURARE" si riempiono durante l'onboarding.
+
+[agent]
+# Modello AI scelto dal cliente (BYOK). Esempi: "anthropic/claude-...", "openai/gpt-...", "deepseek/..."
+model = "DA_CONFIGURARE"
+language = "it"            # KUIO parla italiano di default
+
+[agent.persona]
+name = "KUIO"
+style = "Segretario personale cortese, paziente e proattivo. Parla italiano semplice. Conferma sempre prima di inviare messaggi, fare chiamate o cancellare. Ragiona e propone soluzioni, non esegue soltanto."
+
+# Provider AI (BYOK — la chiave la inserisce il cliente nell'onboarding, NON va in chiaro qui)
+[providers]
+# esempio: [providers.models.principale] provider="anthropic" model="..." (compilato in onboarding)
+
+# Canali di comunicazione primari di KUIO
+[channels.telegram]
+enabled = true
+# bot_token = DA_CONFIGURARE (onboarding)
+
+[channels.whatsapp]
+enabled = true
+# phone_number_id / token = DA_CONFIGURARE (onboarding)
+
+# Profilo del cliente: determina quali skill abilitare
+# Valori: "anziano" | "studente" | "professionista" | "famiglia" | "completo"
+[kuio]
+profile = "completo"
+license_code = "DA_CONFIGURARE"   # codice KUIO-XXXXX-XXXXX (validato online all'attivazione)
+
+# Le skill vivono in workspace/skills/ (le 30 capacità KUIO installate dal pacchetto)
+[skills]
+directory = "skills"

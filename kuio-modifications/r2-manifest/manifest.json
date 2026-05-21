@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "manifest_updated": "2026-05-20T00:00:00Z",
+  "base_url": "https://installer.kuio.ai",
+  "comment": "Manifesto dei file distribuiti via R2. Ogni file deve avere SHA-256 verificato prima di essere usato dal client. Aggiornare ad ogni upload.",
+  "files": {
+    "nssm.exe": {
+      "url": "https://installer.kuio.ai/nssm.exe",
+      "version": "2.24",
+      "size_bytes": 331264,
+      "sha256": "f689ee9af94b00e9e3f0bb072b34caaf207f32dcb4f5782fc9ca351df9a06c97",
+      "uploaded": "2026-05-20T16:30:00Z",
+      "description": "NSSM service wrapper. NON PIU NECESSARIO con ZeroClaw (servizio Windows nativo). Conservato per riferimento.",
+      "source": "https://nssm.cc/release/nssm-2.24.zip (estrarre win64/nssm.exe)",
+      "required_for": []
+    },
+    "kuio-engine-win-v0.7.5.zip": {
+      "url": "https://installer.kuio.ai/kuio-engine-win-v0.7.5.zip",
+      "version": "0.7.5",
+      "size_bytes": 13824334,
+      "sha256": "e8ff73a35ad550d5389d47db3eabc571142c4cc307afb09b2d4ee29d342ff5b8",
+      "uploaded": "2026-05-20T18:55:00Z",
+      "description": "Motore KUIO per Windows (binario ZeroClaw v0.7.5 + dashboard web). Contiene zeroclaw.exe (32MB) + web/dist/. NON ancora brandizzato KUIO (branding in sprint successivo).",
+      "source": "https://github.com/zeroclaw-labs/zeroclaw/releases/download/v0.7.5/zeroclaw-x86_64-pc-windows-msvc.zip",
+      "engine": "ZeroClaw v0.7.5",
+      "required_for": ["InstallKuio.ps1", "service install", "onboarding"]
+    },
+    "kuio-core-v0.1.0.zip": {
+      "url": "https://installer.kuio.ai/kuio-core-v0.1.0.zip",
+      "version": "0.1.0",
+      "size_bytes": 0,
+      "sha256": "DA_POPOLARE_DOPO_BUILD",
+      "description": "Pacchetto skill di base + config default per il workspace utente",
+      "replaces": "kuio-core-demo.zip",
+      "contents_overview": [
+        "skills/ (le 7 skill base)",
+        "config.default.json (config base, BYOK placeholder)",
+        "LEGGIMI.txt (istruzioni italiane)"
+      ]
+    },
+    "InstallKuio.bat": {
+      "url": "https://installer.kuio.ai/InstallKuio.bat",
+      "version": "0.3.0",
+      "size_bytes": 0,
+      "sha256": "DA_POPOLARE_DOPO_UPLOAD",
+      "description": "Entry point per installazione (lancia InstallKuio.ps1 in modalita nascosta)"
+    },
+    "InstallKuio.ps1": {
+      "url": "https://installer.kuio.ai/InstallKuio.ps1",
+      "version": "0.3.0",
+      "size_bytes": 0,
+      "sha256": "DA_POPOLARE_DOPO_UPLOAD",
+      "description": "Script principale di installazione (check sistema + download binari + setup servizio)"
+    }
+  },
+  "current_release": {
+    "channel": "alpha",
+    "version": "0.1.0",
+    "release_date": "DA_POPOLARE_AL_RELEASE",
+    "release_notes": "https://www.kuio.ai/release-notes/v0.1.0",
+    "min_supported_os": "Windows 10 build 1909+",
+    "rollback_to": null
+  }
+}
