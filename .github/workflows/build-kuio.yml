@@ -38,7 +38,7 @@ jobs:
         shell: bash
 
       - name: Compila il motore (release)
-        run: cargo build --release
+        run: cargo build --release --features whatsapp-web
 
       - name: Rinomina in kuio.exe e prepara il pacchetto
         run: |
