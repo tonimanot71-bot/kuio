@@ -1,0 +1,54 @@
+# KUIO — Compila il motore brandizzato per Windows, automaticamente, sui server di GitHub.
+# COME USARLO (Antonio, 3 clic):
+#   1. Vai su github.com/tonimanot71-bot/kuio -> scheda "Actions"
+#   2. Scegli "Build KUIO (Windows)" a sinistra
+#   3. Clicca "Run workflow"
+# Dopo ~15-25 minuti, nella pagina del workflow trovi "kuio-windows" da scaricare:
+# contiene kuio.exe gia BRANDIZZATO (niente "zeroclaw" nei nomi tecnici) + dashboard web.
+# NB: richiede che la cartella kuio-modifications/ sia committata nel fork (branding + script).
+
+name: Build KUIO (Windows)
+
+on:
+  workflow_dispatch:        # avvio manuale (il bottone "Run workflow")
+  push:
+    branches: [ master ]
+    paths: [ "kuio-modifications/**" ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout del codice
+        uses: actions/checkout@v4
+
+      - name: Installa Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Python per gli script di branding
+        uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - name: Applica branding KUIO (testi, icone, logo)
+        run: python kuio-modifications/branding/apply-branding.py
+        shell: bash
+
+      - name: Applica branding PROFONDO (nome servizio, cartella dati)
+        run: python kuio-modifications/branding/deep-branding.py
+        shell: bash
+
+      - name: Compila il motore (release)
+        run: cargo build --release
+
+      - name: Rinomina in kuio.exe e prepara il pacchetto
+        run: |
+          mkdir kuio-out
+          copy target\release\zeroclaw.exe kuio-out\kuio.exe
+          if exist web\dist xcopy /E /I web\dist kuio-out\web\dist
+        shell: cmd
+
+      - name: Pubblica il risultato (scaricabile)
+        uses: actions/upload-artifact@v4
+        with:
+          name: kuio-windows
+          path: kuio-out/
