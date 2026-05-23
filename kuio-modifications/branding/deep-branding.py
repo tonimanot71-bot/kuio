@@ -20,7 +20,7 @@ STRATEGIA SICURA:
   -> il codice continua a compilare. Il comando minuscolo zeroclaw, i crate
   zeroclaw_* e i path crates/zeroclaw-... (minuscoli) non vengono toccati.
 """
-import os, re
+import os, re, sys, subprocess
 
 REPO = os.getcwd()
 SKIP_DIRS = {".git", "target", "node_modules", ".github"}
@@ -85,6 +85,14 @@ def main():
     tot = sum(counts.values())
     print("\n=== BRANDING PROFONDO COMPLETATO: %d file ===" % tot)
     print("Ora 'cargo build --release' produce kuio.exe e dashboard senza 'ZeroClaw' visibile.")
+
+    # KUIO: applica anche la patch "auto-fiducia del proprietario" per Telegram
+    # (il primo utente che scrive viene autorizzato in automatico, niente /bind).
+    # Sta in un file separato cosi' resta testabile da solo; lo eseguiamo qui per
+    # non dover toccare il workflow di GitHub. Se fallisce, fa fallire la build.
+    patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-telegram-autotrust.py")
+    print("\n=== Applico patch auto-fiducia Telegram ===")
+    subprocess.run([sys.executable, patcher], check=True)
 
 
 if __name__ == "__main__":
