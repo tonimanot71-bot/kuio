@@ -49,8 +49,8 @@ def replace_contents():
                         b = f.read()
                 except OSError:
                     continue
-                if b"zeroclaw" in b or b"ZEROCLAW" in b:
-                    b = b.replace(b"zeroclaw", b"kuio").replace(b"ZEROCLAW", b"KUIO")
+                if b"zeroclaw" in b or b"Zeroclaw" in b or b"ZEROCLAW" in b:
+                    b = b.replace(b"zeroclaw", b"kuio").replace(b"Zeroclaw", b"Kuio").replace(b"ZEROCLAW", b"KUIO")
                     try:
                         with open(fp, "wb") as f:
                             f.write(b)
