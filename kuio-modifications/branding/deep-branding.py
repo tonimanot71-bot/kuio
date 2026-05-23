@@ -91,6 +91,11 @@ def main():
     print("\n=== Applico patch auto-fiducia Telegram ===")
     subprocess.run([sys.executable, patcher], check=True)
 
+    # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
+    renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
+    print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
+    subprocess.run([sys.executable, renamer], check=True)
+
 
 if __name__ == "__main__":
     main()
