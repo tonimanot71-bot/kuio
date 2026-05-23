@@ -52,23 +52,39 @@ def replace_contents():
 
 def rename_paths():
     n = 0
-    # files first, then directories, all bottom-up
+    # files first (bottom-up); if a kuio-named target already exists (es. asset
+    # gia' brandizzato da apply-branding), rimuovi l'orfano zeroclaw invece di crashare.
     for root, _dirs, files in os.walk(REPO, topdown=False):
         if _skip(root):
             continue
         for name in files:
-            if "zeroclaw" in name:
-                os.rename(os.path.join(root, name),
-                          os.path.join(root, name.replace("zeroclaw", "kuio")))
+            if "zeroclaw" not in name:
+                continue
+            src = os.path.join(root, name)
+            dst = os.path.join(root, name.replace("zeroclaw", "kuio"))
+            try:
+                if os.path.exists(dst):
+                    os.remove(src)
+                else:
+                    os.rename(src, dst)
                 n += 1
+            except OSError:
+                pass
+    # then directories (bottom-up)
     for root, dirs, _files in os.walk(REPO, topdown=False):
         if _skip(root):
             continue
         for d in dirs:
-            if d not in SKIP_DIRS and "zeroclaw" in d:
-                os.rename(os.path.join(root, d),
-                          os.path.join(root, d.replace("zeroclaw", "kuio")))
-                n += 1
+            if d in SKIP_DIRS or "zeroclaw" not in d:
+                continue
+            src = os.path.join(root, d)
+            dst = os.path.join(root, d.replace("zeroclaw", "kuio"))
+            try:
+                if not os.path.exists(dst):
+                    os.rename(src, dst)
+                    n += 1
+            except OSError:
+                pass
     return n
 
 
