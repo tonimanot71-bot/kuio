@@ -24,10 +24,11 @@ TEXT_EXTS = (
 # "ZeroClaw" maiuscolo visibile -> KUIO (ma non gli identificatori CamelCase tipo ZeroClawConfig).
 WORD = re.compile(r"ZeroClaw(?![A-Za-z0-9_])")
 
-# 'zeroclaw' minuscolo: SOLO gli esempi di comando (seguiti da spazio/tab/backtick/backslash/newline)
-# e non attaccati a un carattere identificatore/percorso. Cosi' "zeroclaw onboard" -> "kuio onboard"
-# ma zeroclaw_log / crates/zeroclaw-channels / zeroclaw::Event / name="zeroclaw" restano intatti.
-CMD = re.compile(r"(?<![A-Za-z0-9_./\\-])zeroclaw(?=[ \t`\\\n])")
+# 'zeroclaw' minuscolo: SOLO quando e' PRECEDUTO DA UN BACKTICK (esempi di comando dentro i
+# messaggi/help, es. `zeroclaw channel ...`) e seguito da spazio/tab. Cosi' "`zeroclaw onboard`" ->
+# "`kuio onboard`" ma identificatori/variabili/crate (zeroclaw_log, let mut zeroclaw =, name="zeroclaw")
+# NON vengono toccati e il codice compila.
+CMD = re.compile(r"(?<=`)zeroclaw(?=[ 	])")
 
 LITERAL = {
     '"com.zeroclaw.daemon"': '"ai.kuio.daemon"',
