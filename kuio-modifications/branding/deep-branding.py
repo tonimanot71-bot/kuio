@@ -2,23 +2,13 @@
 """
 KUIO - Branding PROFONDO del sorgente ZeroClaw (eseguire sul clone del fork PRIMA di compilare).
 
-Rimuove TUTTE le scritte "ZeroClaw" visibili all'utente, ovunque si trovino:
-  - Sorgenti Rust (.rs): system prompt/identita', banner, messaggi di stato, help CLI
-  - Template HTML/SVG/JSON inclusi nel binario (es. <title>...Gateway API</title>)
-  - Sorgente dashboard web (web/**: .ts/.tsx/.js/.html/.css) e build pronta (web/dist)
-  - Cargo.toml (descrizioni/banner)
-  - Service label e cartella dati (.zeroclaw -> .kuio)
+Rimuove TUTTE le scritte "ZeroClaw" visibili all'utente (sorgenti .rs, template
+HTML/SVG/JSON, dashboard web, Cargo.toml, service label, cartella dati .zeroclaw->.kuio)
+e brandizza anche gli ESEMPI DI COMANDO minuscoli ("zeroclaw onboard" -> "kuio onboard")
+senza toccare crate/module/path (zeroclaw_log, crates/zeroclaw-channels, zeroclaw::...)
+cosi' il codice continua a compilare. Alla fine applica la patch auto-fiducia Telegram.
 
-USO (dalla radice del clone del fork, DOPO apply-branding.py):
-    python3 deep-branding.py
-Poi compilare:  cargo build --release
-
-STRATEGIA SICURA:
-  Sostituiamo "ZeroClaw" SOLO quando NON e' seguito da lettera/cifra/underscore.
-  Cosi' la parola visibile "ZeroClaw" diventa "KUIO", MA gli identificatori
-  CamelCase interni come ZeroClawConfig (seguiti da lettera) restano intatti
-  -> il codice continua a compilare. Il comando minuscolo zeroclaw, i crate
-  zeroclaw_* e i path crates/zeroclaw-... (minuscoli) non vengono toccati.
+USO (dalla radice del clone del fork, DOPO apply-branding.py):  python3 deep-branding.py
 """
 import os, re, sys, subprocess
 
@@ -31,7 +21,13 @@ TEXT_EXTS = (
     ".txt", ".md", ".hbs", ".tmpl",
 )
 
+# "ZeroClaw" maiuscolo visibile -> KUIO (ma non gli identificatori CamelCase tipo ZeroClawConfig).
 WORD = re.compile(r"ZeroClaw(?![A-Za-z0-9_])")
+
+# 'zeroclaw' minuscolo: SOLO gli esempi di comando (seguiti da spazio/tab/backtick/backslash/newline)
+# e non attaccati a un carattere identificatore/percorso. Cosi' "zeroclaw onboard" -> "kuio onboard"
+# ma zeroclaw_log / crates/zeroclaw-channels / zeroclaw::Event / name="zeroclaw" restano intatti.
+CMD = re.compile(r"(?<![A-Za-z0-9_./\\-])zeroclaw(?=[ \t`\\\n])")
 
 LITERAL = {
     '"com.zeroclaw.daemon"': '"ai.kuio.daemon"',
@@ -50,6 +46,7 @@ def process(path, do_literal=False):
         return False
     orig = s
     s = WORD.sub("KUIO", s)
+    s = CMD.sub("kuio", s)
     if do_literal:
         for old, new in LITERAL.items():
             s = s.replace(old, new)
@@ -86,10 +83,9 @@ def main():
     print("\n=== BRANDING PROFONDO COMPLETATO: %d file ===" % tot)
     print("Ora 'cargo build --release' produce kuio.exe e dashboard senza 'ZeroClaw' visibile.")
 
-    # KUIO: applica anche la patch "auto-fiducia del proprietario" per Telegram
-    # (il primo utente che scrive viene autorizzato in automatico, niente /bind).
-    # Sta in un file separato cosi' resta testabile da solo; lo eseguiamo qui per
-    # non dover toccare il workflow di GitHub. Se fallisce, fa fallire la build.
+    # KUIO: applica anche la patch "auto-fiducia del proprietario" Telegram (niente /bind).
+    # Sta in un file separato (testabile da solo); eseguito qui per non toccare il workflow.
+    # Se fallisce, fa fallire la build (check=True).
     patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-telegram-autotrust.py")
     print("\n=== Applico patch auto-fiducia Telegram ===")
     subprocess.run([sys.executable, patcher], check=True)
