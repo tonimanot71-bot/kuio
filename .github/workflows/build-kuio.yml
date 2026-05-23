@@ -4,7 +4,7 @@
 #   2. Scegli "Build KUIO (Windows)" a sinistra
 #   3. Clicca "Run workflow"
 # Dopo ~15-25 minuti, nella pagina del workflow trovi "kuio-windows" da scaricare:
-# contiene kuio.exe gia BRANDIZZATO (niente "zeroclaw" nei nomi tecnici) + dashboard web.
+# contiene kuio.exe gia BRANDIZZATO (niente "zeroclaw" da nessuna parte) + dashboard web.
 # NB: richiede che la cartella kuio-modifications/ sia committata nel fork (branding + script).
 
 name: Build KUIO (Windows)
@@ -33,7 +33,7 @@ jobs:
         run: python kuio-modifications/branding/apply-branding.py
         shell: bash
 
-      - name: Applica branding PROFONDO (nome servizio, cartella dati)
+      - name: Applica branding PROFONDO + patch + rinomina crate
         run: python kuio-modifications/branding/deep-branding.py
         shell: bash
 
@@ -43,7 +43,7 @@ jobs:
       - name: Rinomina in kuio.exe e prepara il pacchetto
         run: |
           mkdir kuio-out
-          copy target\release\zeroclaw.exe kuio-out\kuio.exe
+          if exist target\release\kuio.exe ( copy target\release\kuio.exe kuio-out\kuio.exe ) else ( copy target\release\zeroclaw.exe kuio-out\kuio.exe )
           if exist web\dist xcopy /E /I web\dist kuio-out\web\dist
         shell: cmd
 
