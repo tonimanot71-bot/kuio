@@ -30,20 +30,30 @@ def _skip(root):
 
 
 def replace_contents():
+    # Sostituzione a livello di BYTE (indipendente dalla codifica): cattura anche file
+    # con qualche byte non-UTF8 che altrimenti verrebbero saltati. Tre varianti:
+    #   zeroclaw -> kuio (minuscolo, nomi crate/moduli/default)
+    #   ZEROCLAW -> KUIO (maiuscolo, nomi di variabili d'ambiente; nessuno script esterno le usa)
+    # NB: NON tocchiamo "ZeroClaw" CamelCase qui: ci pensa gia' deep-branding.py con i confini
+    #     di parola (cosi' identificatori come ZeroClawConfig restano coerenti). Nel binario il
+    #     capital risulta gia' 0.
     n = 0
     for root, dirs, files in os.walk(REPO):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
         for fn in files:
             ext = os.path.splitext(fn)[1].lower()
             if ext in TEXT_EXTS or fn in NAMED:
-                p = os.path.join(root, fn)
+                fp = os.path.join(root, fn)
                 try:
-                    s = open(p, encoding="utf-8").read()
-                except (UnicodeDecodeError, OSError):
+                    with open(fp, "rb") as f:
+                        b = f.read()
+                except OSError:
                     continue
-                if "zeroclaw" in s:
+                if b"zeroclaw" in b or b"ZEROCLAW" in b:
+                    b = b.replace(b"zeroclaw", b"kuio").replace(b"ZEROCLAW", b"KUIO")
                     try:
-                        open(p, "w", encoding="utf-8").write(s.replace("zeroclaw", "kuio"))
+                        with open(fp, "wb") as f:
+                            f.write(b)
                         n += 1
                     except OSError:
                         pass
