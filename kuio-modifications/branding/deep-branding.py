@@ -96,6 +96,11 @@ def main():
     print("\n=== Applico patch certificati nativi IMAP (email) ===")
     subprocess.run([sys.executable, imap_patcher], check=True)
 
+    # KUIO: patch "rispondi sempre" (classificatore non deve saltare messaggi diretti).
+    ar_patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-always-reply.py")
+    print("\n=== Applico patch rispondi-sempre (classificatore) ===")
+    subprocess.run([sys.executable, ar_patcher], check=True)
+
     # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
     renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
     print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
