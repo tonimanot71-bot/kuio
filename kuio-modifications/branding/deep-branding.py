@@ -91,6 +91,11 @@ def main():
     print("\n=== Applico patch auto-fiducia Telegram ===")
     subprocess.run([sys.executable, patcher], check=True)
 
+    # KUIO: patch certificati nativi per IMAP/email (email funziona con antivirus/proxy attivi).
+    imap_patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-imap-nativecerts.py")
+    print("\n=== Applico patch certificati nativi IMAP (email) ===")
+    subprocess.run([sys.executable, imap_patcher], check=True)
+
     # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
     renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
     print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
