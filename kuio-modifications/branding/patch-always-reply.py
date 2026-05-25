@@ -6,58 +6,83 @@ PROBLEMA:
   L'agente usa un classificatore REPLY/NO_REPLY che a volte SALTA messaggi
   diretti dell'utente giudicandoli "gia' risposti / informational" (es. stessa
   domanda ripetuta, anche in giorni diversi). Per un segretario e' inaccettabile:
-  ogni messaggio diretto dell'utente deve ricevere risposta.
+  ogni messaggio diretto del proprietario deve ricevere risposta.
 
-SOLUZIONE (a basso rischio):
-  Rafforza il PROMPT del classificatore (una stringa di testo) aggiungendo una
-  direttiva: un messaggio diretto 1:1 dell'utente e' SEMPRE call-to-action ->
-  sempre REPLY, mai NO_REPLY. NON tocca la logica del codice, quindi non puo'
-  rompere la compilazione.
+SOLUZIONE (deterministica, a livello di LOGICA, non di prompt):
+  Il motore ha gia' uno scavalcamento del classificatore per il canale ACP:
+  se il classificatore vota NO_REPLY, su ACP viene forzato REPLY. Estendiamo
+  quello stesso scavalcamento a TUTTI i messaggi diretti 1:1 (DM Telegram,
+  email privata): se non e' un gruppo, si risponde sempre. I gruppi restano
+  gestiti dal classificatore (chiacchiere tra altre persone -> NO_REPLY ok).
+
+  Si appoggia a `is_group_reply_target(&msg.reply_target)` gia' presente nello
+  stesso modulo: e' True solo per i gruppi (WhatsApp @g.us o prefisso "group:").
+  Quindi `!is_group_reply_target(...)` == messaggio diretto.
+
+  NON tocca il testo del prompt (fragile): cambia una sola condizione `if`.
+  Le parentesi attorno a `(is_acp_channel || kuio_is_direct_message)` sono
+  necessarie (precedenza + let-chain), quindi clippy non le segnala come ridondanti.
 
 COME:
-  Cerca in tutti i .rs sotto crates/ la frase esatta del prompt del classificatore
-  (presa dal binario) e vi inserisce la direttiva subito dopo. Fail-loud se non la
-  trova (meglio build fallita che patch silenziosamente non applicata).
+  Cerca nei .rs sotto crates/ l'ancora esatta del blocco di scavalcamento e
+  inserisce la variabile + estende la condizione. Idempotente (marker) e
+  fail-loud se l'ancora non c'e' (meglio build rossa che patch non applicata).
 
 USO: python3 kuio-modifications/branding/patch-always-reply.py
 """
 import os, sys
 
-ANCHOR = "system broadcasts, or content the embedded system prompt explicitly tells the assistant to ignore."
-ADD = " A direct one-to-one message from the user (a private direct chat, or an email addressed to you) is NEVER in this category: it is ALWAYS a call to action and MUST ALWAYS receive REPLY, even when it is identical or very similar to an earlier message, and even if you believe you already answered it before. NEVER emit NO_REPLY for a direct one-to-one message from the user; NO_REPLY is only for group chatter between other people or for system broadcasts."
-MARKER = "is NEVER in this category"
+ANCHOR = (
+    "    let reply_intent = if is_acp_channel\n"
+    "        && let AssistantChannelOutcome::NoReply {"
+)
 
+REPLACEMENT = (
+    "    // KUIO: ogni messaggio diretto 1:1 (DM Telegram / email privata) e' una richiesta\n"
+    "    // del proprietario e DEVE sempre ricevere risposta. Come per ACP, scavalca il\n"
+    "    // classificatore quando vota NO_REPLY su un messaggio diretto. I gruppi restano\n"
+    "    // gestiti dal classificatore (chiacchiere tra altre persone -> NO_REPLY consentito).\n"
+    "    // Riusa `is_group_chat` gia' calcolato sopra (== is_group_reply_target(reply_target)).\n"
+    "    let kuio_is_direct_message = !is_group_chat;\n"
+    "    let reply_intent = if (is_acp_channel || kuio_is_direct_message)\n"
+    "        && let AssistantChannelOutcome::NoReply {"
+)
 
-EXTS = (".rs", ".ftl", ".txt", ".md", ".toml", ".json", ".yaml", ".yml", ".hbs", ".tmpl")
+MARKER = "kuio_is_direct_message"
+
 SKIP = {".git", "target", "node_modules"}
 
+
 def main():
-    targets = []
+    hits = []
     for dirpath, dirs, files in os.walk("."):
         dirs[:] = [d for d in dirs if d not in SKIP]
         for fn in files:
-            if fn.endswith(EXTS):
-                fp = os.path.join(dirpath, fn)
-                try:
-                    s = open(fp, encoding="utf-8").read()
-                except Exception:
-                    continue
-                if ANCHOR in s:
-                    targets.append(fp)
-    if not targets:
-        print("ERRORE patch always-reply: frase del prompt classificatore non trovata in nessun .rs", file=sys.stderr)
+            if not fn.endswith(".rs"):
+                continue
+            fp = os.path.join(dirpath, fn)
+            try:
+                s = open(fp, encoding="utf-8").read()
+            except Exception:
+                continue
+            if MARKER in s:
+                print("always-reply: gia' applicata in " + fp)
+                return
+            if ANCHOR in s:
+                hits.append(fp)
+    if not hits:
+        print(
+            "ERRORE patch always-reply: ancora del blocco di scavalcamento "
+            "(let reply_intent = if is_acp_channel ...) non trovata in nessun .rs",
+            file=sys.stderr,
+        )
         sys.exit(1)
-    changed = 0
-    for p in targets:
+    for p in hits:
         s = open(p, encoding="utf-8").read()
-        if MARKER in s:
-            print("always-reply: gia' applicata in " + p)
-            continue
-        s = s.replace(ANCHOR, ANCHOR + ADD, 1)
+        s = s.replace(ANCHOR, REPLACEMENT, 1)
         open(p, "w", encoding="utf-8").write(s)
         print("always-reply: applicata in " + p)
-        changed += 1
-    print("patch always-reply: OK (%d file modificati, %d totali con anchor)" % (changed, len(targets)))
+    print("patch always-reply: OK (%d file modificati)" % len(hits))
 
 
 if __name__ == "__main__":
