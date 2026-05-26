@@ -117,6 +117,12 @@ def main():
     print("\n=== Applico patch whatsapp QR -> log (Stanza italiana) ===")
     subprocess.run([sys.executable, wq_patcher], check=True)
 
+    # KUIO: endpoint POST /api/channels/signal/start-pairing che fa proxy al daemon
+    # signal-cli per generare l'URI di pairing (la Stanza disegna il QR da quell'URI).
+    sp_patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-signal-start-pairing.py")
+    print("\n=== Applico patch signal start-pairing endpoint (Stanza italiana) ===")
+    subprocess.run([sys.executable, sp_patcher], check=True)
+
     # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
     renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
     print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
