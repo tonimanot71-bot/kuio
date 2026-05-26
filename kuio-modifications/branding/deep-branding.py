@@ -101,6 +101,11 @@ def main():
     print("\n=== Applico patch rispondi-sempre (classificatore) ===")
     subprocess.run([sys.executable, ar_patcher], check=True)
 
+    # KUIO: patch validator transcription_provider (accetta nomi bare per i single-instance).
+    tb_patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-transcription-bare.py")
+    print("\n=== Applico patch transcription_provider bare (voce in entrata) ===")
+    subprocess.run([sys.executable, tb_patcher], check=True)
+
     # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
     renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
     print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
