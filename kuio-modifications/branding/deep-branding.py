@@ -112,6 +112,11 @@ def main():
     print("\n=== Applico patch telegram transcription bind (voce in entrata) ===")
     subprocess.run([sys.executable, tt_patcher], check=True)
 
+    # KUIO: logga il payload del QR di WhatsApp Web nel log (per la Stanza italiana).
+    wq_patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-whatsapp-qr-to-log.py")
+    print("\n=== Applico patch whatsapp QR -> log (Stanza italiana) ===")
+    subprocess.run([sys.executable, wq_patcher], check=True)
+
     # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
     renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
     print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
