@@ -106,6 +106,12 @@ def main():
     print("\n=== Applico patch transcription_provider bare (voce in entrata) ===")
     subprocess.run([sys.executable, tb_patcher], check=True)
 
+    # KUIO: lega il TranscriptionManager del canale Telegram al provider configurato
+    # (bug strutturale: senza binding i voice message falliscono SEMPRE).
+    tt_patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-telegram-transcription-bind.py")
+    print("\n=== Applico patch telegram transcription bind (voce in entrata) ===")
+    subprocess.run([sys.executable, tt_patcher], check=True)
+
     # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
     renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
     print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
