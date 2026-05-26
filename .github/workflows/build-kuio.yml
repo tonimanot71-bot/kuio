@@ -13,7 +13,7 @@ on:
   workflow_dispatch:        # avvio manuale (il bottone "Run workflow")
   push:
     branches: [ master ]
-    paths: [ "kuio-modifications/**" ]
+    paths: [ "kuio-modifications/**", ".github/workflows/build-kuio.yml" ]
 
 jobs:
   build-windows:
@@ -22,8 +22,16 @@ jobs:
       - name: Checkout del codice
         uses: actions/checkout@v4
 
-      - name: Installa Rust (stable)
-        uses: dtolnay/rust-toolchain@stable
+      - name: Installa Rust (stable, via rustup ufficiale)
+        # Evitiamo dtolnay/rust-toolchain perche' codeload.github.com fallisce
+        # ricorrentemente il download dell'archivio (problema CDN GitHub, 2026-05-26).
+        # rustup-init.exe e' sul CDN Rust (win.rustup.rs) e funziona in modo affidabile.
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe
+          .\rustup-init.exe -y --default-toolchain stable --profile minimal --no-modify-path
+          Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.cargo\bin"
+          & "$env:USERPROFILE\.cargo\bin\rustc.exe" --version
 
       - name: Python per gli script di branding
         uses: actions/setup-python@v5
