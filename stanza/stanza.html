@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KUIO — Pannello di controllo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #f3f3f3;
+    --card: #ffffff;
+    --ink: #1b1b1b;
+    --ink-soft: #323130;
+    --muted: #5c5c5c;
+    --muted-2: #8a8886;
+    --accent: #0067c0;
+    --accent-hover: #005a9e;
+    --accent-soft: #ebf3fb;
+    --ok: #107c10;
+    --ok-soft: #dff6dd;
+    --warn: #976f00;
+    --warn-soft: #fff4ce;
+    --danger: #c42b1c;
+    --danger-soft: #fde7e9;
+    --line: #e5e5e5;
+    --line-strong: #c8c6c4;
+    --shadow-1: 0 1px 2px rgba(0,0,0,0.04), 0 0 0 1px var(--line);
+    --shadow-2: 0 2px 6px rgba(0,0,0,0.06), 0 0 0 1px var(--line);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 24px 80px; }
+
+  /* ---- App bar ---- */
+  .appbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 4px 18px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: 0;
+  }
+  .brand .mark {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 600; font-size: 13px; letter-spacing: 0.4px;
+  }
+  .appbar .right { display: flex; align-items: center; gap: 16px; }
+  .appbar .small { color: var(--muted); font-size: 13px; }
+
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ok-soft); color: var(--ok);
+    border: 1px solid #b8e0b8;
+    border-radius: 14px; padding: 4px 10px; font-size: 12px; font-weight: 600;
+  }
+  .status-chip.warn { background: var(--warn-soft); color: var(--warn); border-color: #f1d68a; }
+  .status-chip.bad  { background: var(--danger-soft); color: var(--danger); border-color: #f1bcc1; }
+  .status-chip .lamp { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+  /* ---- Section card ---- */
+  section.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-1);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  section.card .head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  section.card h2 {
+    margin: 0; font-size: 14px; font-weight: 600; color: var(--ink);
+    letter-spacing: 0;
+  }
+  section.card .sub { color: var(--muted); font-size: 12px; }
+
+  /* ---- Headline ---- */
+  .headline {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-1);
+    padding: 18px 22px;
+    margin-bottom: 14px;
+  }
+  .headline h1 {
+    margin: 0 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.2px;
+  }
+  .headline p { margin: 0; color: var(--muted); font-size: 13px; }
+
+  /* ---- Skill grid ---- */
+  .skills {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+  }
+  .skill {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fafafa;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .skill .ic {
+    width: 18px; height: 18px; color: var(--accent);
+    flex-shrink: 0;
+  }
+  .skill .ic svg { width: 100%; height: 100%; display: block; }
+
+  /* ---- Channels ---- */
+  .channels { display: flex; flex-direction: column; gap: 8px; }
+  .channel {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    background: #fafafa;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .channel .ic {
+    width: 22px; height: 22px; color: var(--accent);
+    flex-shrink: 0;
+  }
+  .channel .ic svg { width: 100%; height: 100%; display: block; }
+  .channel .label { flex: 1; }
+  .channel .label .name { font-weight: 600; font-size: 13px; color: var(--ink); }
+  .channel .label .sub { color: var(--muted); font-size: 12px; }
+
+  /* ---- Buttons ---- */
+  .btn {
+    appearance: none; border: 0; cursor: pointer;
+    background: var(--accent); color: #fff;
+    border-radius: 4px; padding: 8px 16px;
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    transition: background 0.12s ease;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:active { background: #004d87; }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn.secondary {
+    background: #ffffff; color: var(--ink); border: 1px solid var(--line-strong);
+  }
+  .btn.secondary:hover { background: #f5f5f5; }
+  .btn.subtle {
+    background: transparent; color: var(--accent); padding: 6px 10px;
+  }
+  .btn.subtle:hover { background: var(--accent-soft); }
+
+  /* ---- Settings grid ---- */
+  .settings {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+  }
+  .setting-btn {
+    background: #fafafa; border: 1px solid var(--line);
+    border-radius: 6px; padding: 14px 16px;
+    text-align: left; cursor: pointer; font-family: inherit;
+    display: flex; gap: 12px; align-items: flex-start;
+    transition: background 0.12s ease;
+  }
+  .setting-btn:hover { background: #f0f0f0; }
+  .setting-btn .ic { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .setting-btn .ic svg { width: 100%; height: 100%; display: block; }
+  .setting-btn .body { flex: 1; }
+  .setting-btn .t { font-weight: 600; font-size: 13px; color: var(--ink); }
+  .setting-btn .d { color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+  /* ---- Footer ---- */
+  footer.bottom {
+    color: var(--muted-2); font-size: 12px;
+    margin-top: 28px; text-align: center;
+  }
+
+  /* ---- Modal ---- */
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.40);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 16px;
+  }
+  .modal-back.open { display: flex; }
+  .modal {
+    background: var(--card); border-radius: var(--radius);
+    max-width: 540px; width: 100%; padding: 22px 24px;
+    box-shadow: 0 20px 48px rgba(0,0,0,0.22);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .modal h3 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  .modal p { color: var(--muted); margin: 0 0 12px; font-size: 13px; line-height: 1.55; }
+  .modal ol { padding-left: 22px; line-height: 1.65; margin: 6px 0 12px; font-size: 13px; }
+  .modal ol li { margin: 3px 0; color: var(--ink-soft); }
+  .modal ol li code {
+    background: #f0f0f0; padding: 1px 6px; border-radius: 3px; font-size: 12px;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+  .modal label.lbl {
+    display: block; font-weight: 600; font-size: 12px; margin-bottom: 4px;
+    color: var(--ink); text-transform: none;
+  }
+  .modal .input {
+    width: 100%; padding: 8px 10px; font-size: 13px; font-family: inherit;
+    border: 1px solid var(--line-strong); border-radius: 4px; background: #fff;
+  }
+  .modal .input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+  .modal .input.mono {
+    font-family: "Cascadia Code", Consolas, "SF Mono", monospace; font-size: 12px;
+  }
+  .modal select.input { padding: 7px 10px; }
+  .modal .row {
+    display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;
+  }
+  .modal .note, .modal .ok, .modal .err {
+    padding: 10px 12px; border-radius: 4px; font-size: 12px;
+    margin: 12px 0; line-height: 1.5;
+  }
+  .modal .note { background: var(--warn-soft); border: 1px solid #f1d68a; color: #5b4400; }
+  .modal .ok   { background: var(--ok-soft);   border: 1px solid #b8e0b8; color: #0b5a0b; }
+  .modal .err  { background: var(--danger-soft); border: 1px solid #f1bcc1; color: #7a1d1d; }
+  .modal .ok.hidden, .modal .err.hidden { display: none; }
+
+  @media (max-width: 720px) {
+    .appbar .small { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="appbar">
+    <div class="brand">
+      <span class="mark">K</span>
+      <span>Kuio</span>
+      <span class="small">Pannello di controllo</span>
+    </div>
+    <div class="right">
+      <span class="small">Italiano</span>
+      <span id="status-pill" class="status-chip"><span class="lamp"></span><span id="status-text">Verifico…</span></span>
+    </div>
+  </header>
+
+  <div class="headline">
+    <h1>Buongiorno.</h1>
+    <p>Il segretario digitale è in esecuzione sul tuo PC. Da questo pannello configuri canali, cervello AI e impostazioni operative.</p>
+  </div>
+
+  <section class="card">
+    <div class="head">
+      <h2>Canali di contatto</h2>
+      <span class="sub">Come i tuoi interlocutori ti raggiungono</span>
+    </div>
+    <div class="channels">
+
+      <div class="channel" id="ch-telegram">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 4.5 2.5 11l5 2 1.5 5 3-3 5 4 4.5-14.5z"/><path d="m7.5 13 9-6"/></svg>
+        </span>
+        <div class="label">
+          <div class="name">Telegram</div>
+          <div class="sub" id="tg-sub">Verifico…</div>
+        </div>
+        <span class="status-chip warn" id="tg-state"><span class="lamp"></span>Da collegare</span>
+        <button class="btn secondary" id="tg-btn" onclick="openTelegramWizard()">Collega</button>
+      </div>
+
+      <div class="channel" id="ch-email">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 7 9-7"/></svg>
+        </span>
+        <div class="label">
+          <div class="name">Posta elettronica</div>
+          <div class="sub" id="em-sub">Verifico…</div>
+        </div>
+        <span class="status-chip warn" id="em-state"><span class="lamp"></span>Da collegare</span>
+        <button class="btn secondary" id="em-btn" onclick="openEmailInfo()">Modifica</button>
+      </div>
+
+      <div class="channel" id="ch-signal">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </span>
+        <div class="label">
+          <div class="name">Signal</div>
+          <div class="sub" id="sg-sub">Verifico…</div>
+        </div>
+        <span class="status-chip warn" id="sg-state"><span class="lamp"></span>Da collegare</span>
+        <button class="btn secondary" id="sg-btn" onclick="openSignalInfo()">Modifica</button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="head">
+      <h2>Servizi attivi</h2>
+      <span class="sub">Cosa fa Kuio, il tuo segretario intelligente 100% italiano, per te</span>
+    </div>
+    <div class="skills" id="skills-grid">
+      <div class="skill"><span class="ic"></span><span>Carico l'elenco dei servizi…</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="head">
+      <h2>Impostazioni</h2>
+      <span class="sub">Configurazione generale</span>
+    </div>
+    <div class="settings">
+      <button class="setting-btn" onclick="openApiKeyWizard()">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="3"/><path d="M12 12h9m-3-3v6m-3-3v3"/></svg>
+        </span>
+        <div class="body">
+          <div class="t">Provider AI</div>
+          <div class="d">Modello e chiave del cervello (Gemini, DeepSeek, …).</div>
+        </div>
+      </button>
+      <button class="setting-btn" onclick="openVoiceInfo()">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </span>
+        <div class="body">
+          <div class="t">Voce</div>
+          <div class="d">Voce italiana in uscita e ascolto dei messaggi vocali in entrata.</div>
+        </div>
+      </button>
+      <button class="setting-btn" onclick="openLogs()">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6m0 6v6M3 12h6m6 0h6"/></svg>
+        </span>
+        <div class="body">
+          <div class="t">Diagnostica</div>
+          <div class="d">Stato dei componenti e ultime righe del registro tecnico.</div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <footer class="bottom">
+    Kuio — segretario digitale, in esecuzione locale sul tuo PC.
+  </footer>
+</div>
+
+<!-- ---------- Modal: Telegram wizard ---------- -->
+<div class="modal-back" id="modal-tg" onclick="closeModal(event,'modal-tg')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Collego Telegram</h3>
+    <p>Creiamo il tuo bot Telegram dedicato. Tre passi.</p>
+
+    <ol>
+      <li>Apri Telegram e cerca <b>BotFather</b> (oppure usa <a href="https://t.me/BotFather" target="_blank" rel="noopener">questo link</a>).</li>
+      <li>Scrivi <code>/newbot</code> a BotFather. Ti chiederà:
+        <ul style="margin:4px 0 4px 16px; padding-left:14px; font-size:13px;">
+          <li>Un <b>nome</b> per il segretario (es. "Segretario Studio Rossi").</li>
+          <li>Un <b>nome utente</b> univoco che finisca con <b>bot</b> (es. <code>studio_rossi_segretario_bot</code>).</li>
+        </ul>
+      </li>
+      <li>Copia il <b>codice (token)</b> che ti restituisce e incollalo qui sotto.</li>
+    </ol>
+
+    <label class="lbl" for="tg-token">Codice (token) di BotFather</label>
+    <input class="input mono" id="tg-token" placeholder="Esempio: 7891234567:AAH…xYz" autocomplete="off"/>
+
+    <div class="note">Il codice resta sul tuo PC.</div>
+    <div class="ok hidden" id="tg-ok">Telegram collegato. Aspetta qualche secondo e prova a scrivere al bot.</div>
+    <div class="err hidden" id="tg-err"></div>
+
+    <div class="row">
+      <button class="btn secondary" onclick="closeModal(null,'modal-tg')">Annulla</button>
+      <button class="btn" id="tg-save" onclick="saveTelegramToken()">Collega</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal: WhatsApp wizard ---------- -->
+<div class="modal-back" id="modal-wa" onclick="closeModal(event,'modal-wa')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Collego WhatsApp</h3>
+    <p>Collegamento via WhatsApp Web al numero personale dello studio.</p>
+
+    <ol>
+      <li>Apri <b>WhatsApp</b> sul telefono.</li>
+      <li><b>Impostazioni</b> → <b>Dispositivi collegati</b> → <b>Collega un dispositivo</b>.</li>
+      <li>Inquadra il codice qui sotto con la fotocamera.</li>
+    </ol>
+
+    <div id="wa-status" class="note">Preparo il collegamento, attendere…</div>
+
+    <div style="display:flex;justify-content:center;padding:10px 0;">
+      <div id="wa-qr" style="background:#fff;padding:14px;border-radius:4px;border:1px solid var(--line);width:260px;height:260px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;text-align:center;">In attesa del codice…</div>
+    </div>
+
+    <div id="wa-ok" class="ok hidden">WhatsApp collegato.</div>
+    <div id="wa-err" class="err hidden"></div>
+
+    <div class="row">
+      <button class="btn secondary" onclick="closeWaModal()">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal: API key wizard ---------- -->
+<div class="modal-back" id="modal-ak" onclick="closeModal(event,'modal-ak')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Provider AI</h3>
+    <p>Modello e chiave del cervello che alimenta il segretario.</p>
+
+    <label class="lbl" for="ak-provider">Modello</label>
+    <select class="input" id="ak-provider">
+      <option value="gemini.default">Google Gemini (consigliato per email e operatività)</option>
+      <option value="deepseek.default">DeepSeek (più economico)</option>
+    </select>
+
+    <label class="lbl" for="ak-key" style="margin-top:12px;">Chiave API</label>
+    <input class="input mono" id="ak-key" placeholder="Incolla la chiave fornita dal provider" autocomplete="off"/>
+
+    <div class="note">Per Google Gemini la chiave gratuita si crea su <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a>.</div>
+    <div class="ok hidden" id="ak-ok">Chiave salvata. Il segretario sta ripartendo con il nuovo modello.</div>
+    <div class="err hidden" id="ak-err"></div>
+
+    <div class="row">
+      <button class="btn secondary" onclick="closeModal(null,'modal-ak')">Annulla</button>
+      <button class="btn" id="ak-save" onclick="saveApiKey()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal: Email info ---------- -->
+<div class="modal-back" id="modal-em" onclick="closeModal(event,'modal-em')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Posta elettronica</h3>
+    <p>Indirizzo della casella che il segretario gestisce. Funziona con Gmail (password applicativa di 16 caratteri).</p>
+
+    <label class="lbl" for="em-address">Indirizzo email</label>
+    <input class="input" id="em-address" placeholder="nome@gmail.com" autocomplete="off"/>
+
+    <label class="lbl" for="em-password">Password applicativa (16 caratteri)</label>
+    <input class="input mono" id="em-password" placeholder="xxxx xxxx xxxx xxxx" autocomplete="off"/>
+
+    <div class="note">La password applicativa si crea su <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a> (servono 2FA attiva e generare una nuova "Password per app"). Rimane salvata solo sul tuo PC.</div>
+
+    <div class="ok hidden" id="em-ok">Casella collegata. Il segretario inizia a ricevere fra qualche secondo.</div>
+    <div class="err hidden" id="em-err"></div>
+
+    <div class="row">
+      <button class="btn secondary" onclick="closeModal(null,'modal-em')">Annulla</button>
+      <button class="btn" id="em-save" onclick="saveEmail()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal: signal info + pairing wizard ---------- -->
+<div class="modal-back" id="modal-sg" onclick="closeModal(event,'modal-sg')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Signal</h3>
+    <p>Il segretario riceve e risponde ai messaggi Signal del numero collegato.</p>
+    <div id="sg-info" class="note">Verifico il numero collegato…</div>
+
+    <div id="sg-pair-step1">
+      <p>Per cambiare il numero collegato, prepara il telefono con cui vuoi collegare Signal e poi clicca qui sotto.</p>
+      <div class="row">
+        <button class="btn secondary" onclick="closeModal(null,'modal-sg')">Chiudi</button>
+        <button class="btn" id="sg-start-btn" onclick="startSignalPairing()">Cambia numero collegato</button>
+      </div>
+    </div>
+
+    <div id="sg-pair-step2" class="hidden">
+      <ol>
+        <li>Sul telefono apri <b>Signal</b>.</li>
+        <li>Vai su <b>Impostazioni</b> &rarr; <b>Dispositivi collegati</b>.</li>
+        <li>Tocca il pulsante <b>+</b> (Collega un nuovo dispositivo).</li>
+        <li>Inquadra il codice qui sotto.</li>
+      </ol>
+      <div style="display:flex;justify-content:center;padding:10px 0;">
+        <div id="sg-qr" style="background:#fff;padding:14px;border-radius:4px;border:1px solid var(--line);width:260px;height:260px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;text-align:center;">Preparo il codice…</div>
+      </div>
+      <div id="sg-pair-status" class="note">Dopo la scansione, la conferma arriva in qualche secondo.</div>
+      <div id="sg-ok" class="ok hidden">Numero collegato.</div>
+      <div id="sg-err" class="err hidden"></div>
+      <div class="row">
+        <button class="btn secondary" onclick="cancelSignalPairing()">Annulla</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Modal: voice info ---------- -->
+<div class="modal-back" id="modal-voce" onclick="closeModal(event,'modal-voce')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Voce</h3>
+    <p>Voce in uscita: italiano, voce maschile "Diego" (motore Edge TTS). Voce in entrata: trascrizione locale dei messaggi vocali (Whisper, esecuzione sul PC).</p>
+    <p>Configurazione di voce e tono in una prossima iterazione.</p>
+    <div class="row"><button class="btn secondary" onclick="closeModal(null,'modal-voce')">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ---------- Modal: logs ---------- -->
+<div class="modal-back" id="modal-log" onclick="closeModal(event,'modal-log')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Diagnostica</h3>
+    <p>Ultime righe del registro tecnico del motore.</p>
+    <pre id="log-pre" style="background:#f5f5f5;border:1px solid var(--line);border-radius:4px;padding:10px;max-height:50vh;overflow:auto;font-size:11px;font-family:'Cascadia Code',Consolas,monospace;white-space:pre-wrap;color:var(--ink-soft);">Carico…</pre>
+    <div class="row"><button class="btn secondary" onclick="closeModal(null,'modal-log')">Chiudi</button></div>
+  </div>
+</div>
+
+<script>
+// SVG factory
+function ic(d, opts) {
+  opts = opts || {};
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+}
+const ICONS = {
+  bell:      ic('<path d="M6 8a6 6 0 0 1 12 0c0 4 2 6 2 6H4s2-2 2-6z"/><path d="M10 19a2 2 0 0 0 4 0"/>'),
+  clipboard: ic('<rect x="6" y="4" width="12" height="17" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/>'),
+  calendar:  ic('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+  users:     ic('<circle cx="9" cy="9" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 11a3 3 0 1 0 0-6m4 14a5 5 0 0 0-4-5"/>'),
+  folder:    ic('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
+  mail:      ic('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 7 9-7"/>'),
+  receipt:   ic('<path d="M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3z"/><path d="M8 8h8M8 12h8M8 16h5"/>'),
+  globe:     ic('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
+  chat:      ic('<path d="M21 12a8 8 0 0 1-12.5 6.5L3 20l1.5-5A8 8 0 1 1 21 12z"/>'),
+  wallet:    ic('<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M17 14h2"/>'),
+  search:    ic('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>'),
+  book:      ic('<path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M4 16a4 4 0 0 1 4-4h10"/>'),
+  pen:       ic('<path d="M14 4 4 14v6h6L20 10z"/><path d="m13 5 6 6"/>'),
+  phone:     ic('<path d="M22 16.5v3a2 2 0 0 1-2.2 2 19.7 19.7 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.2 3.8 2 2 0 0 1 4.2 1.5h3a2 2 0 0 1 2 1.7l.6 3a2 2 0 0 1-.5 2L8 9.5a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2-.5l3 .6a2 2 0 0 1 1.7 2z"/>'),
+  filetext:  ic('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>'),
+  mic:       ic('<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),
+  globe2:    ic('<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c-3 4-3 14 0 18M12 3c3 4 3 14 0 18"/>'),
+  tooth:     ic('<path d="M7 3c2 0 2 1.5 5 1.5S15 3 17 3c3 0 4 2.5 4 5 0 3-1 5-1.5 8-.4 2.5-1 5-2.5 5-1.5 0-1.5-2-2-4-.4-1.7-1-3-3-3s-2.6 1.3-3 3c-.5 2-.5 4-2 4-1.5 0-2.1-2.5-2.5-5C4 13 3 11 3 8c0-2.5 1-5 4-5z"/>'),
+  recall:    ic('<path d="M3 12a9 9 0 1 0 3.5-7.1"/><path d="M3 4v5h5"/>'),
+  pack:      ic('<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="m12 11v10"/>'),
+};
+
+// Skill mapping (B2B / B2C focus — consumer ones hidden for now)
+const SKILL_LABELS = {
+  "kuio-avvisi":         ["bell",      "Notifiche e promemoria"],
+  "kuio-burocrazia":     ["clipboard", "Pratiche burocratiche"],
+  "kuio-calendario":     ["calendar",  "Calendario e appuntamenti"],
+  "kuio-clienti":        ["users",     "Gestione clienti"],
+  "kuio-documenti":      ["folder",    "Gestione documenti"],
+  "kuio-email":          ["mail",      "Posta elettronica"],
+  "kuio-fiscale":        ["receipt",   "Adempimenti fiscali"],
+  "kuio-lingue":         ["globe",     "Traduzione e lingue"],
+  "kuio-messaggi":       ["chat",      "Messaggistica per conto tuo"],
+  "kuio-note-spese":     ["wallet",    "Note spese"],
+  "kuio-ricerca":        ["search",    "Ricerca informazioni"],
+  "kuio-rubrica":        ["book",      "Rubrica contatti"],
+  "kuio-scrittura":      ["pen",       "Redazione testi"],
+  "kuio-telefonate":     ["phone",     "Pianificazione chiamate"],
+  "kuio-verbali":        ["filetext",  "Verbali e minute"],
+  "kuio-voce":           ["mic",       "Comandi e dettatura vocale"],
+  "kuio-web-avanzato":   ["globe2",    "Navigazione web evoluta"],
+};
+// Consumer-only skills hidden for now (caricate nel motore ma non esposte nel pannello B2B).
+const HIDDEN_SKILLS = new Set([
+  "kuio-aiuto-smartphone","kuio-antitruffa","kuio-benessere","kuio-compagnia",
+  "kuio-diario-salute","kuio-lettura","kuio-medicine","kuio-referti-medici",
+  "kuio-sos","kuio-studio","kuio-visite-mediche","kuio-checkin","kuio-foto-intelligente",
+  // Skill-pack pilota Studio Dentistico — file su disco ma nascoste nella Stanza
+  // finche' non finiamo il giro "tutto funziona" e ci dedichiamo ufficialmente alle skill.
+  "kuio-dentista-agenda","kuio-dentista-richiami","kuio-dentista-preventivi",
+  "kuio-dentista-anamnesi","kuio-dentista-post-cura","kuio-dentista-fornitori",
+]);
+
+async function callApi(path, init) {
+  const r = await fetch(path, init);
+  if (!r.ok) throw new Error("HTTP " + r.status + ": " + (await r.text()));
+  const ct = r.headers.get("content-type") || "";
+  return ct.includes("json") ? r.json() : r.text();
+}
+
+async function refreshStatus() {
+  const pill = document.getElementById("status-pill");
+  const text = document.getElementById("status-text");
+  try {
+    await callApi("/api/status");
+    text.textContent = "In esecuzione";
+    pill.classList.remove("warn","bad");
+  } catch (e) {
+    text.textContent = "Non raggiungibile";
+    pill.classList.remove("warn"); pill.classList.add("bad");
+  }
+}
+
+async function refreshAgentsAndChannels() {
+  let cfg = null;
+  try { cfg = await callApi("/api/config"); } catch(e) {}
+  const grid = document.getElementById("skills-grid");
+  let skills = [];
+  try {
+    const agents = await callApi("/api/agents");
+    const list = (agents && agents.agents) ? agents.agents : (Array.isArray(agents) ? agents : []);
+    if (list.length && list[0].skills) skills = list[0].skills;
+  } catch(e) {}
+  if (!skills.length) skills = Object.keys(SKILL_LABELS);
+  // Filter to B2B-relevant + apply labels
+  grid.innerHTML = "";
+  skills.filter(k => !HIDDEN_SKILLS.has(k) && SKILL_LABELS[k]).forEach(k => {
+    const [icKey, label] = SKILL_LABELS[k];
+    const d = document.createElement("div");
+    d.className = "skill";
+    d.innerHTML = '<span class="ic">' + (ICONS[icKey] || "") + '</span><span>' + label + '</span>';
+    grid.appendChild(d);
+  });
+
+  // Channels
+  // /api/config restituisce direttamente la struct Config (non wrappata in {config: ...}).
+  const c = (cfg && cfg.channels) || {};
+  const tg = c.telegram && c.telegram.default;
+  if (tg && tg.enabled && tg.bot_token) {
+    setChip("tg-state", "ok", "Collegato");
+    document.getElementById("tg-sub").textContent = "Il tuo bot è operativo";
+    document.getElementById("tg-btn").textContent = "Sostituisci";
+  } else {
+    document.getElementById("tg-sub").textContent = "Crea un bot personalizzato col tuo nome";
+  }
+  const em = c.email && c.email.default;
+  if (em && em.enabled) {
+    const ad = em.from_address || em.username || "casella collegata";
+    setChip("em-state", "ok", "Collegata");
+    document.getElementById("em-sub").textContent = ad;
+    document.getElementById("em-info").textContent = "Casella collegata: " + ad + ".";
+  } else {
+    document.getElementById("em-sub").textContent = "Non collegata";
+  }
+  const wa = c.whatsapp && c.whatsapp.default;
+  if (wa && wa.enabled) {
+    // Will flip to "Collegato" once session is opened (after QR scan).
+    document.getElementById("wa-sub").textContent = "Canale configurato — completa il QR se non l'hai già fatto";
+  }
+  const sg = c.signal && c.signal.default;
+  const sgSub = document.getElementById("sg-sub");
+  const sgInfo = document.getElementById("sg-info");
+  if (sg && sg.enabled && sg.account) {
+    setChip("sg-state", "ok", "Collegato");
+    if (sgSub) sgSub.textContent = "Numero: " + sg.account;
+    if (sgInfo) sgInfo.textContent = "Numero collegato: " + sg.account + ".";
+  } else {
+    if (sgSub) sgSub.textContent = "Non collegato";
+    if (sgInfo) sgInfo.textContent = "Nessun numero collegato.";
+  }
+}
+
+function setChip(id, kind, text) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("warn","bad");
+  if (kind === "warn") el.classList.add("warn");
+  else if (kind === "bad") el.classList.add("bad");
+  el.innerHTML = '<span class="lamp"></span>' + text;
+}
+
+// ---- modal helpers ----
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(ev, id) {
+  if (ev && ev.target && ev.target.classList && !ev.target.classList.contains("modal-back")) return;
+  document.getElementById(id).classList.remove("open");
+}
+function openTelegramWizard() { openModal("modal-tg"); }
+function openApiKeyWizard()   { openModal("modal-ak"); }
+async function openEmailInfo() {
+  // Pre-popola con i dati attuali (la password non viene mai esposta dal motore).
+  try {
+    const cfg = await callApi("/api/config");
+    const em = cfg && cfg.channels && cfg.channels.email && cfg.channels.email.default;
+    if (em) {
+      const addr = em.from_address || em.username || "";
+      document.getElementById("em-address").value = addr;
+    }
+  } catch(_) {}
+  document.getElementById("em-password").value = "";
+  document.getElementById("em-ok").classList.add("hidden");
+  document.getElementById("em-err").classList.add("hidden");
+  openModal("modal-em");
+}
+function openSignalInfo() {
+  // Reset stato del modal pairing.
+  document.getElementById("sg-pair-step1").classList.remove("hidden");
+  document.getElementById("sg-pair-step2").classList.add("hidden");
+  document.getElementById("sg-ok").classList.add("hidden");
+  document.getElementById("sg-err").classList.add("hidden");
+  const qrEl = document.getElementById("sg-qr");
+  if (qrEl) qrEl.innerHTML = "Preparo il codice…";
+  stopSignalPairingPolling();
+  openModal("modal-sg");
+}
+function openVoiceInfo()      { openModal("modal-voce"); }
+async function openLogs() {
+  openModal("modal-log");
+  const pre = document.getElementById("log-pre");
+  try {
+    const t = await callApi("/api/logs?limit=80");
+    pre.textContent = (typeof t === "string") ? t : JSON.stringify(t, null, 2);
+  } catch(e) { pre.textContent = "Registro non raggiungibile: " + e.message; }
+}
+
+// ---- WhatsApp pairing ----
+let waPollTimer = null;
+let waLastQrPayload = null;
+
+async function openWhatsAppWizard() {
+  document.getElementById("wa-ok").classList.add("hidden");
+  document.getElementById("wa-err").classList.add("hidden");
+  document.getElementById("wa-qr").innerHTML = '<span>In attesa del codice…</span>';
+  document.getElementById("wa-status").textContent = "Preparo il collegamento, attendere…";
+  waLastQrPayload = null;
+  openModal("modal-wa");
+  try { await ensureWhatsappChannel(); }
+  catch (e) { showWaError("Non sono riuscito a preparare il canale: " + e.message); return; }
+  startWaPolling();
+}
+function closeWaModal() { stopWaPolling(); closeModal(null, "modal-wa"); }
+
+async function ensureWhatsappChannel() {
+  try {
+    await callApi("/api/config/prop", {
+      method: "PUT", headers: {"content-type":"application/json"},
+      body: JSON.stringify({path: "channels.whatsapp.default.enabled", value: true})
+    });
+  } catch(_) {}
+  try {
+    await callApi("/api/config/prop", {
+      method: "PUT", headers: {"content-type":"application/json"},
+      body: JSON.stringify({path: "channels.whatsapp.default.mode", value: "personal"})
+    });
+  } catch(_) {}
+  try {
+    const cfg = await callApi("/api/config/list");
+    const ch = (cfg && cfg.config && cfg.config.agents && cfg.config.agents.default && cfg.config.agents.default.channels) || [];
+    if (!ch.includes("whatsapp.default")) {
+      ch.push("whatsapp.default");
+      await callApi("/api/config/prop", {
+        method: "PUT", headers: {"content-type":"application/json"},
+        body: JSON.stringify({path: "agents.default.channels", value: ch})
+      });
+    }
+  } catch(_) {}
+  try { await callApi("/admin/reload", {method: "POST"}); } catch(_) {}
+}
+
+function startWaPolling() {
+  stopWaPolling();
+  waPollTimer = setInterval(pollWaLogs, 2000);
+  pollWaLogs();
+}
+function stopWaPolling() {
+  if (waPollTimer) { clearInterval(waPollTimer); waPollTimer = null; }
+}
+
+async function pollWaLogs() {
+  try {
+    const logs = await callApi("/api/logs?limit=400");
+    const text = (typeof logs === "string") ? logs : JSON.stringify(logs);
+    const matches = [...text.matchAll(/"qr_payload"\s*:\s*"([^"]+)"/g)];
+    if (matches.length) {
+      const payload = matches[matches.length - 1][1];
+      if (payload !== waLastQrPayload) {
+        waLastQrPayload = payload;
+        renderWaQr(payload);
+        document.getElementById("wa-status").textContent = "Codice pronto. Scansionalo subito da WhatsApp del telefono.";
+      }
+    }
+    if (text.includes("WhatsApp Web: logged in") || text.includes("connected as JID") || text.includes("pairing successful")) {
+      document.getElementById("wa-ok").classList.remove("hidden");
+      stopWaPolling();
+      setTimeout(refreshAgentsAndChannels, 1500);
+    }
+  } catch(e) { /* ignore intermittent */ }
+}
+
+function renderWaQr(payload) {
+  const el = document.getElementById("wa-qr");
+  el.style.padding = "8px"; el.style.width = "auto"; el.style.height = "auto";
+  el.innerHTML = "";
+  try {
+    if (typeof qrcode !== "function") { el.textContent = "Libreria QR non caricata."; return; }
+    const qr = qrcode(0, "M");
+    qr.addData(payload);
+    qr.make();
+    el.innerHTML = qr.createImgTag(6, 8);
+  } catch (e) { el.textContent = "Errore nel disegnare il codice: " + e.message; }
+}
+
+function showWaError(msg) {
+  const e = document.getElementById("wa-err");
+  e.textContent = msg;
+  e.classList.remove("hidden");
+}
+
+// ---- save handlers ----
+async function saveTelegramToken() {
+  const token = document.getElementById("tg-token").value.trim();
+  const ok = document.getElementById("tg-ok"); const err = document.getElementById("tg-err");
+  const btn = document.getElementById("tg-save");
+  ok.classList.add("hidden"); err.classList.add("hidden");
+  if (!/^[0-9]{6,}:[A-Za-z0-9_-]{20,}$/.test(token)) {
+    err.textContent = "Formato del codice non valido. Atteso: numero:lettere (es. 1234567890:ABC…).";
+    err.classList.remove("hidden"); return;
+  }
+  btn.disabled = true; btn.textContent = "Salvataggio…";
+  try {
+    await callApi("/api/config/prop", { method: "PUT", headers: {"content-type":"application/json"},
+      body: JSON.stringify({ path: "channels.telegram.default.bot_token", value: token }) });
+    await callApi("/api/config/prop", { method: "PUT", headers: {"content-type":"application/json"},
+      body: JSON.stringify({ path: "channels.telegram.default.enabled", value: true }) });
+    try { await callApi("/admin/reload", { method: "POST" }); } catch(_) {}
+    ok.classList.remove("hidden");
+    setTimeout(refreshAgentsAndChannels, 1500);
+  } catch(e) {
+    err.textContent = "Salvataggio fallito: " + e.message;
+    err.classList.remove("hidden");
+  } finally { btn.disabled = false; btn.textContent = "Collega"; }
+}
+
+// ---- Signal pairing wizard (richiede endpoint motore /api/channels/signal/start-pairing + /pairing-status) ----
+let sgPollTimer = null;
+let sgPairingId = null;
+
+function stopSignalPairingPolling() {
+  if (sgPollTimer) { clearInterval(sgPollTimer); sgPollTimer = null; }
+  sgPairingId = null;
+}
+
+function cancelSignalPairing() {
+  stopSignalPairingPolling();
+  closeModal(null, "modal-sg");
+}
+
+function renderSignalQr(payload) {
+  const el = document.getElementById("sg-qr");
+  el.style.padding = "8px"; el.style.width = "auto"; el.style.height = "auto";
+  el.innerHTML = "";
+  try {
+    if (typeof qrcode !== "function") { el.textContent = "Libreria QR non caricata."; return; }
+    const qr = qrcode(0, "M");
+    qr.addData(payload);
+    qr.make();
+    el.innerHTML = qr.createImgTag(6, 8);
+  } catch (e) { el.textContent = "Errore nel disegnare il codice: " + e.message; }
+}
+
+async function startSignalPairing() {
+  const btn = document.getElementById("sg-start-btn");
+  const err = document.getElementById("sg-err");
+  const ok = document.getElementById("sg-ok");
+  err.classList.add("hidden"); ok.classList.add("hidden");
+  btn.disabled = true; btn.textContent = "Preparo il codice…";
+  try {
+    const r = await callApi("/api/channels/signal/start-pairing", {
+      method: "POST", headers: {"content-type":"application/json"},
+      body: JSON.stringify({ device_name: "Kuio" })
+    });
+    const uri = r && (r.device_link_uri || r.uri);
+    const pairingId = r && r.pairing_id;
+    if (!uri || !uri.startsWith("sgnl://")) {
+      throw new Error("Il servizio Signal non ha restituito un codice valido.");
+    }
+    sgPairingId = pairingId || null;
+    document.getElementById("sg-pair-step1").classList.add("hidden");
+    document.getElementById("sg-pair-step2").classList.remove("hidden");
+    renderSignalQr(uri);
+    // Polling sullo stato del pairing (endpoint dedicato che monitora finishLink).
+    sgPollTimer = setInterval(pollSignalPairing, 3000);
+  } catch (e) {
+    err.textContent = "Impossibile avviare il collegamento: " + e.message;
+    err.classList.remove("hidden");
+  } finally {
+    btn.disabled = false; btn.textContent = "Cambia numero collegato";
+  }
+}
+
+async function pollSignalPairing() {
+  // Senza pairing_id non possiamo interrogare lo stato.
+  if (!sgPairingId) { stopSignalPairingPolling(); return; }
+  try {
+    const st = await callApi("/api/channels/signal/pairing-status?id=" + encodeURIComponent(sgPairingId));
+    if (!st || !st.status) return;
+    if (st.status === "linked") {
+      stopSignalPairingPolling();
+      const account = st.account || "";
+      // Se abbiamo ricevuto il numero, lo salviamo nel config in modo che
+      // il motore ricarichi il canale Signal con l'account corretto.
+      if (account) {
+        try {
+          await callApi("/api/config/prop", { method: "PUT", headers: {"content-type":"application/json"},
+            body: JSON.stringify({ path: "channels.signal.default.account", value: account }) });
+          await callApi("/api/config/prop", { method: "PUT", headers: {"content-type":"application/json"},
+            body: JSON.stringify({ path: "channels.signal.default.enabled", value: true }) });
+          await callApi("/admin/reload", { method: "POST" });
+        } catch(_) {}
+      }
+      const okEl = document.getElementById("sg-ok");
+      okEl.textContent = account
+        ? ("Telefono collegato. Numero: " + account + ".")
+        : "Telefono collegato.";
+      okEl.classList.remove("hidden");
+      setTimeout(refreshAgentsAndChannels, 1500);
+    } else if (st.status === "expired") {
+      stopSignalPairingPolling();
+      const errEl = document.getElementById("sg-err");
+      errEl.textContent = "Tempo scaduto: il codice non e' stato confermato in tempo. Riprova.";
+      errEl.classList.remove("hidden");
+      // Riporto la UI allo step iniziale.
+      document.getElementById("sg-pair-step2").classList.add("hidden");
+      document.getElementById("sg-pair-step1").classList.remove("hidden");
+    } else if (st.status === "error") {
+      stopSignalPairingPolling();
+      const errEl = document.getElementById("sg-err");
+      errEl.textContent = "Collegamento non riuscito: " + (st.error || "errore sconosciuto") + ". Riprova.";
+      errEl.classList.remove("hidden");
+      document.getElementById("sg-pair-step2").classList.add("hidden");
+      document.getElementById("sg-pair-step1").classList.remove("hidden");
+    }
+    // status === "pending": continua a pollare.
+  } catch(_) {}
+}
+
+async function saveEmail() {
+  const addr = document.getElementById("em-address").value.trim();
+  const pwd = document.getElementById("em-password").value.replace(/\s+/g, "");
+  const ok = document.getElementById("em-ok"); const err = document.getElementById("em-err");
+  const btn = document.getElementById("em-save");
+  ok.classList.add("hidden"); err.classList.add("hidden");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)) {
+    err.textContent = "Indirizzo email non valido."; err.classList.remove("hidden"); return;
+  }
+  if (pwd.length < 12) {
+    err.textContent = "Password applicativa troppo corta (le password applicative di Gmail sono 16 caratteri).";
+    err.classList.remove("hidden"); return;
+  }
+  btn.disabled = true; btn.textContent = "Salvataggio…";
+  const isGmail = /@gmail\.com$/i.test(addr) || /@googlemail\.com$/i.test(addr);
+  try {
+    const props = [
+      ["channels.email.default.from_address", addr],
+      ["channels.email.default.username", addr],
+      ["channels.email.default.password", pwd],
+      ["channels.email.default.enabled", true],
+    ];
+    if (isGmail) {
+      props.push(["channels.email.default.imap_host", "imap.gmail.com"]);
+      props.push(["channels.email.default.imap_port", 993]);
+      props.push(["channels.email.default.imap_folder", "INBOX"]);
+      props.push(["channels.email.default.smtp_host", "smtp.gmail.com"]);
+      props.push(["channels.email.default.smtp_port", 465]);
+      props.push(["channels.email.default.smtp_tls", true]);
+    }
+    for (const [path, value] of props) {
+      await callApi("/api/config/prop", {
+        method: "PUT", headers: {"content-type":"application/json"},
+        body: JSON.stringify({ path, value })
+      });
+    }
+    // Assicura che email.default sia tra i canali dell'agente.
+    try {
+      const cfg = await callApi("/api/config");
+      const ch = (cfg && cfg.agents && cfg.agents.default && cfg.agents.default.channels) || [];
+      if (!ch.includes("email.default")) {
+        ch.push("email.default");
+        await callApi("/api/config/prop", {
+          method: "PUT", headers: {"content-type":"application/json"},
+          body: JSON.stringify({ path: "agents.default.channels", value: ch })
+        });
+      }
+    } catch(_) {}
+    try { await callApi("/admin/reload", { method: "POST" }); } catch(_) {}
+    ok.classList.remove("hidden");
+    setTimeout(refreshAgentsAndChannels, 1500);
+  } catch(e) {
+    err.textContent = "Salvataggio fallito: " + e.message;
+    err.classList.remove("hidden");
+  } finally { btn.disabled = false; btn.textContent = "Salva"; }
+}
+
+async function saveApiKey() {
+  const provider = document.getElementById("ak-provider").value;
+  const key = document.getElementById("ak-key").value.trim();
+  const ok = document.getElementById("ak-ok"); const err = document.getElementById("ak-err");
+  const btn = document.getElementById("ak-save");
+  ok.classList.add("hidden"); err.classList.add("hidden");
+  if (key.length < 20) {
+    err.textContent = "La chiave sembra incompleta.";
+    err.classList.remove("hidden"); return;
+  }
+  btn.disabled = true; btn.textContent = "Salvataggio…";
+  try {
+    const [ty, alias] = provider.split(".");
+    await callApi("/api/config/prop", { method: "PUT", headers: {"content-type":"application/json"},
+      body: JSON.stringify({ path: `providers.models.${ty}.${alias}.api_key`, value: key }) });
+    await callApi("/api/config/prop", { method: "PUT", headers: {"content-type":"application/json"},
+      body: JSON.stringify({ path: "agents.default.model_provider", value: provider }) });
+    try { await callApi("/admin/reload", { method: "POST" }); } catch(_) {}
+    ok.classList.remove("hidden");
+  } catch(e) {
+    err.textContent = "Salvataggio fallito: " + e.message;
+    err.classList.remove("hidden");
+  } finally { btn.disabled = false; btn.textContent = "Salva"; }
+}
+
+// ---- boot ----
+refreshStatus();
+refreshAgentsAndChannels();
+setInterval(refreshStatus, 30000);
+</script>
+</body>
+</html>
