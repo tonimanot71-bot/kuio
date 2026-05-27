@@ -123,6 +123,13 @@ def main():
     print("\n=== Applico patch signal start-pairing endpoint (Stanza italiana) ===")
     subprocess.run([sys.executable, sp_patcher], check=True)
 
+    # KUIO: endpoint POST /api/dialog/folder che apre il FolderBrowserDialog nativo
+    # Windows (via PowerShell -Sta) per permettere all'utente di scegliere visivamente
+    # la cartella di lavoro di Kuio dalla Stanza italiana.
+    fd_patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-folder-dialog.py")
+    print("\n=== Applico patch folder dialog endpoint (Stanza italiana) ===")
+    subprocess.run([sys.executable, fd_patcher], check=True)
+
     # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
     renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
     print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
