@@ -130,6 +130,13 @@ def main():
     print("\n=== Applico patch folder dialog endpoint (Stanza italiana) ===")
     subprocess.run([sys.executable, fd_patcher], check=True)
 
+    # KUIO: filtro deterministico che strippa i caratteri markdown (*, _, #, `, etc.)
+    # dal testo PRIMA di passarlo al provider TTS. Evita che il sintetizzatore vocale
+    # legga "asterisco asterisco" e simili. Indipendente dalla regola di prompt.
+    sm_patcher = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patch-strip-markdown-tts.py")
+    print("\n=== Applico patch strip markdown per TTS ===")
+    subprocess.run([sys.executable, sm_patcher], check=True)
+
     # KUIO: rinomina i crate zeroclaw-* -> kuio-* (azzera zeroclaw nei nomi modulo/percorsi del binario).
     renamer = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deep-rename.py")
     print("\n=== Deep-rename crate zeroclaw-* -> kuio-* ===")
